@@ -1,0 +1,169 @@
+<html>
+<head>
+<style>
+    div
+    {
+        color: white; 
+        background-color: LightSlateGrey; 
+        width: 590px;
+        margin: auto;
+        padding: 66px;
+        border: 1px solid black; 
+        border-radius: 8px;
+    }
+    input
+    {
+       border-radius: 2px;
+       border: 1px solid black;  
+    }
+</style>
+</head>
+<body>
+    <div>
+        Enter Your URL <input style="width:470px;" placeholder="Enter or copy the src URL" oninput="updatedata();" id="src_url" type="text"> <br><br>
+        <input  style="margin-left:170px;"  type="radio" id="basic" name="version" value="basic" checked onchange="updatedata();" > Basic Configuration
+        <input style="margin-left:20px" type="radio" id="enterprise" name="version" value="enterprise" onchange="updatedata();" >Enterprise Configuration
+        <br><br>
+        GitHub URL <input style="width: 470px;" id="github_url" readonly="true" type="text"> <br><br>
+        Organization <input id="repo_org" readonly="true" type="text">
+        Project <input style="width: 260px; border-radius: 2px; border: 1px solid black;" id="job_name" type="text">
+        <br><br>
+        Config URL:<input style="width: 470px;" id="config_url" readonly="true" type="text">
+        <br><br>
+        <label style="margin-left: 185px;">
+        <input style=" background-color: LightSteelBlue; height:40px; color:white;" type="button" id="jenkins_job_button" value="Configure Pipeline" onclick="createJenkinsBuild();" disabled>
+        <input style="background-color: LightSteelBlue; height:40px; color:white;" type="button" id="jenkins_build_button" value="Build Pipeline" onclick="startBuild();"  disabled>   
+        </label>
+    </div>
+<script>
+var txtbx = document.getElementById("src_url").value;
+var txtbxln = txtbx.length;
+function updatedata()
+{
+    var urlText = document.getElementById("src_url").value;
+    var urlProtocol = urlText.split("//", 1);
+    var urlElements = urlText.split("/"); 
+    if((urlProtocol == "https:")||(urlProtocol == "http:"))
+    {
+        var pttnidx = urlText.indexOf("/blob/");
+        var txtln = urlText.length;
+        var txtsb = urlText.substring(pttnidx,txtln);
+        var patterned = urlText.replace(txtsb,".git");
+        if(pttnidx > 0)
+        {
+            var confType = document.getElementById("basic").checked ? "-basic": "-enterprise";
+            document.getElementById("repo_org").value = urlElements[3];
+            document.getElementById("job_name").value = urlElements[4] + confType;
+            document.getElementById("github_url").value = patterned;
+            document.getElementById("config_url").value = urlText.replace(txtsb, confType + ".git");
+            enableConfigureJob();
+            
+        }
+        else
+        {
+	    document.getElementById("github_url").value= ""; 
+	    document.getElementById("config_url").value= "";
+            document.getElementById("repo_org").value = "";
+            document.getElementById("job_name").value = ""; 
+	    disableConfigureJob();
+        }
+        
+    } 
+    else
+    {
+        
+        document.getElementById("github_url").value= ""; 
+        document.getElementById("config_url").value= "";
+        document.getElementById("repo_org").value = "";
+        document.getElementById("job_name").value = ""; 
+        disableConfigureJob();
+    }
+
+    if(txtbxln !== urlText.length){
+         document.getElementById("jenkins_job_button").style.backgroundColor = "LightSteelBlue";
+         document.getElementById("jenkins_job_button").value = "Configure Pipeline";  
+    }
+ 
+}
+
+
+function enableConfigureJob() {
+   document.getElementById("jenkins_job_button").disabled = false; 
+   document.getElementById("jenkins_job_button").style.cursor = "pointer"; 
+}  
+
+function disableConfigureJob() {
+   document.getElementById("jenkins_job_button").disabled = true; 
+   document.getElementById("jenkins_job_button").style.cursor = ""; 
+} 
+
+function configure(config){
+    if(config == 1){
+        document.getElementById("jenkins_job_button").style.backgroundColor = "green";
+        document.getElementById("jenkins_job_button").value = "Configured";
+        disableConfigureJob();
+        document.getElementById("jenkins_build_button").disabled = false;
+        document.getElementById("jenkins_build_button").style.cursor = "pointer"; 
+        return;
+    
+    }
+
+    if(config == 0){
+        document.getElementById("jenkins_job_button").style.backgroundColor = "red";
+        document.getElementById("jenkins_job_button").value = "Error in Configuration";
+    }
+}
+
+function createJenkinsBuild() {
+ 
+    console.log("Entering.. createJenkinsBuild()");
+    var buildName = document.getElementById("job_name").value;
+    var gitHubURL = document.getElementById("github_url").value;
+    var configURL = document.getElementById("config_url").value;
+    // As quick fix, sending configURL as gitHubURL
+    var jenkinsURL = location.href + "createJenkinsBuild?jobName=" + buildName 
+                                   + "&gitHubURL=" + configURL; 
+    
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function()  {
+        if (xhttp.readyState == 4 && xhttp.status == 200) {
+            var res = xhttp.responseText;
+            console.log("IN createJenkinsBuild(): " + res);
+            configure(1);
+          
+        } else {
+            console.log("IN createJenkinsBuild() ERROR [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+            configure(0);
+            
+        }
+    };
+    
+    xhttp.open("GET", jenkinsURL, true);
+    xhttp.send();				
+    
+}
+
+function startBuild() {
+
+    var buildName = document.getElementById("job_name").value;
+    var startBuildUrl = location.href + "startJenkinsBuild?jobName=" + buildName;
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() 
+    {
+        if (xhttp.readyState == 4 && xhttp.status == 200) 
+        {
+            var res = xhttp.responseText;
+            console.log(res);
+                        
+        } else {
+            console.log("IN startBuild() ERROR [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+        }
+    };
+    
+    xhttp.open("GET", startBuildUrl, true);
+    xhttp.send();    
+    
+}
+</script>    
+</body>
+</html>
