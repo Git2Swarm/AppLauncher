@@ -3,7 +3,7 @@ var Client = require('node-rest-client').Client;
 var app = express();
 var StringDecoder = require('string_decoder').StringDecoder;
 
-var file = require("fs");
+var fs = require("fs");
 var http = require('http');
 var url = require('url');
 
@@ -24,7 +24,7 @@ var options_auth = { user: jenkinsUser, password: jenkinsPassword };
 var client = new Client(options_auth);
 
 app.get('/', function (request, response){
-    file.readFile('jenkinsdemo.html', function (err, html) {
+    fs.readFile('jenkinsdemo.html', function (err, html) {
         if (err) {
             console.log("ERROR reading jenkinsdemo.html");
         }  
@@ -37,7 +37,7 @@ app.get('/', function (request, response){
 
 app.get('/createJenkinsBuild', function(request, response) {
     var query = url.parse(request.url,true).query;
-    var gitHubURL = query.gitHubURL;
+    var gitHubURL = query.configGitHubURL;
     console.log(query);
     client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) { 
         crumb = data;
@@ -46,10 +46,55 @@ app.get('/createJenkinsBuild', function(request, response) {
         console.log(data);
         var crumbStr = data.defaultCrumbIssuer.crumb[0];
 
-        var payload = "<?xml version='1.0' encoding='UTF-8'?><flow-definition plugin='workflow-job@2.1'>  <description></description>  <keepDependencies>false</keepDependencies>  <properties>    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin='github@1.19.0'>      <projectUrl>"+gitHubURL+"</projectUrl>      <displayName></displayName>    </com.coravy.hudson.plugins.github.GithubProjectProperty>  </properties>  <definition class='org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition' plugin='workflow-cps@2.2'>    <scm class='hudson.plugins.git.GitSCM' plugin='git@2.4.4'>      <configVersion>2</configVersion>      <userRemoteConfigs>        <hudson.plugins.git.UserRemoteConfig>          <url>"+gitHubURL+"</url>        </hudson.plugins.git.UserRemoteConfig>      </userRemoteConfigs>      <branches>        <hudson.plugins.git.BranchSpec>          <name>*/master</name>        </hudson.plugins.git.BranchSpec>      </branches><doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations><submoduleCfg class='list'/><extensions/> </scm>    <scriptPath>Jenkinsfile</scriptPath>  </definition>  <triggers/></flow-definition>";
+        var jobConfig = `<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.1">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.19.0">
+      <projectUrl>${gitHubURL}</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <EnvInjectJobProperty plugin="envinject@1.92.1">
+      <info>
+        <propertiesContent>DEVPROJROOTURL=${query.srcGitHubUrl}
+DEVPROJROOTDIR=${query.baseDir}
+DEVPROJCOMPOSEDIR=${query.composeDir}</propertiesContent>
+        <loadFilesFromMaster>false</loadFilesFromMaster>
+      </info>
+      <on>true</on>
+      <keepJenkinsSystemVariables>true</keepJenkinsSystemVariables>
+      <keepBuildVariables>true</keepBuildVariables>
+      <overrideBuildParameters>false</overrideBuildParameters>
+      <contributors/>
+    </EnvInjectJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.2">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@2.4.4">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>${gitHubURL}</url>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/master</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="list"/>
+      <extensions/>
+    </scm>
+    <scriptPath>Jenkinsfile</scriptPath>
+  </definition>
+  <triggers/>
+</flow-definition>
+`;
         var args = {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr },
-            data: payload    
+            data: jobConfig
         };            
         client.post(jenkinsURL + "/createItem?name=" + query.jobName, args, function( data, response ) {
             console.log(data);
@@ -69,9 +114,10 @@ app.get('/createJenkinsBuild', function(request, response) {
 app.get('/startJenkinsBuild', function(request, response) {
     var query = url.parse(request.url,true).query;
     var gitHubURL = query.gitHubURL;
-    var query = url.parse(request.url,true).query;
-    console.log( "IN startJenkinsBuild : " + query);
-     client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) { 
+    console.log("IN startJenkinsBuild");
+    console.log(query);
+
+    client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) { 
         crumb = data;
         console.log("Building pipeline");
         console.log("=======================");

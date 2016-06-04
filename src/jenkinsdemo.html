@@ -28,7 +28,10 @@
         Organization <input id="repo_org" readonly="true" type="text">
         Project <input style="width: 260px; border-radius: 2px; border: 1px solid black;" id="job_name" type="text">
         <br><br>
-        Config URL:<input style="width: 470px;" id="config_url" readonly="true" type="text">
+        Config URL<input style="width: 470px;" id="config_url" type="text">
+        <br><br>
+        <label style="margin-left: -20px;">Base Directory   <input id="base_dir" type="text"></label>
+        <label style="margin-left: 10px;">Compose Directory <input  id="compose_dir" type="text"></label>
         <br><br>
         <label style="margin-left: 185px;">
         <input style=" background-color: LightSteelBlue; height:40px; color:white;" type="button" id="jenkins_job_button" value="Configure Pipeline" onclick="createJenkinsBuild();" disabled>
@@ -117,13 +120,18 @@ function configure(config){
 function createJenkinsBuild() {
  
     console.log("Entering.. createJenkinsBuild()");
-    var buildName = document.getElementById("job_name").value;
-    var gitHubURL = document.getElementById("github_url").value;
-    var configURL = document.getElementById("config_url").value;
-    // As quick fix, sending configURL as gitHubURL
+    var buildName  = document.getElementById("job_name").value;
+    var gitHubURL  = document.getElementById("github_url").value;
+    var configURL  = document.getElementById("config_url").value;
+    var baseDir    = document.getElementById("base_dir").value;
+    var composeDir = document.getElementById("compose_dir").value;
     var jenkinsURL = location.href + "createJenkinsBuild?jobName=" + buildName 
-                                   + "&gitHubURL=" + configURL; 
+                                   + "&configGitHubURL=" + configURL
+                                   + "&srcGitHubUrl=" + gitHubURL
+                                   + "&baseDir=" + baseDir
+                                   + "&composeDir=" + composeDir; 
     
+    console.log(jenkinsURL);
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function()  {
         if (xhttp.readyState == 4 && xhttp.status == 200) {
