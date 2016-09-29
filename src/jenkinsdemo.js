@@ -9,9 +9,11 @@ var url = require('url');
 
 if ( process.env.JENKINS_URL == undefined ||
      process.env.JENKINS_USER == undefined ||
-     process.env.JENKINS_PASSWORD == undefined ) {
+     process.env.JENKINS_PASSWORD == undefined ||
+     process.env.DOCKER_HUB_USER == undefined ||
+     process.env.DOCKER_HUB_PASSWORD == undefined ) {
 
-     console.log("ERROR: set enviroment variable JENKINS_URL, JENKINS_USER and JENKINS_PASSWORD");
+     console.log("ERROR: set enviroment variable JENKINS_URL, JENKINS_USER, JENKINS_PASSWORD, DOCKER_HUB_USER, and DOCKER_HUB_PASSWORD");
      process.exit(1);
 }
 
@@ -60,7 +62,9 @@ app.get('/createJenkinsBuild', function(request, response) {
       <info>
         <propertiesContent>DEVPROJROOTURL=${query.srcGitHubUrl}
 DEVPROJROOTDIR=${query.baseDir}
-DEVPROJCOMPOSEDIR=${query.composeDir}</propertiesContent>
+DEVPROJCOMPOSEDIR=${query.composeDir}
+DOCKER_HUB_USER=${process.env.DOCKER_HUB_USER}
+DOCKER_HUB_PASSWORD=${process.env.DOCKER_HUB_PASSWORD}</propertiesContent>
         <loadFilesFromMaster>false</loadFilesFromMaster>
       </info>
       <on>true</on>
@@ -112,7 +116,7 @@ DEVPROJCOMPOSEDIR=${query.composeDir}</propertiesContent>
 });
 
 app.get('/startJenkinsBuild', function(request, response) {
-    var query = url.parse(request.url,true).query;
+    var query = url.parse(request.url, true).query;
     var gitHubURL = query.gitHubURL;
     console.log("IN startJenkinsBuild");
     console.log(query);
@@ -124,18 +128,17 @@ app.get('/startJenkinsBuild', function(request, response) {
         console.log(data);
         var crumbStr = data.defaultCrumbIssuer.crumb[0];
 
-        var payload = "<?xml version='1.0' encoding='UTF-8'?><flow-definition plugin='workflow-job@2.1'>  <description></description>  <keepDependencies>false</keepDependencies>  <properties>    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin='github@1.19.0'>      <projectUrl>"+gitHubURL+"</projectUrl>      <displayName></displayName>    </com.coravy.hudson.plugins.github.GithubProjectProperty>  </properties>  <definition class='org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition' plugin='workflow-cps@2.2'>    <scm class='hudson.plugins.git.GitSCM' plugin='git@2.4.4'>      <configVersion>2</configVersion>      <userRemoteConfigs>        <hudson.plugins.git.UserRemoteConfig>          <url>"+gitHubURL+"</url>        </hudson.plugins.git.UserRemoteConfig>      </userRemoteConfigs>      <branches>        <hudson.plugins.git.BranchSpec>          <name>*/master</name>        </hudson.plugins.git.BranchSpec>      </branches><doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations><submoduleCfg class='list'/><extensions/> </scm>    <scriptPath>Jenkinsfile</scriptPath>  </definition>  <triggers/></flow-definition>";
         var args = {
-            headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr },
-            data: payload    
+            headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
         }; 
-    client.post(jenkinsURL + "job/" + query.jobName + "/build",args ,function (data, response) {
-        crumb = data;
-        console.log(crumb);
-        
-        var decoder = new  StringDecoder('utf8');    
-        console.log(decoder.write(data));
-    });
+
+        client.post(jenkinsURL + "/job/" + query.jobName + "/build", args, function (data, response) {
+            crumb = data;
+            console.log(crumb);
+            
+            var decoder = new  StringDecoder('utf8');    
+            console.log(decoder.write(data));
+        });
             
     }).on('error', function(e) {
         console.log("Error while reading container jenkinsURL", e);
