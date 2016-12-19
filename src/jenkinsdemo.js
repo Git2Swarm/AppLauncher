@@ -10,10 +10,13 @@ var url = require('url');
 if ( process.env.JENKINS_URL == undefined ||
      process.env.JENKINS_USER == undefined ||
      process.env.JENKINS_PASSWORD == undefined ||
+     process.env.ARTIFACTORY_URL == undefined ||
+     process.env.ARTIFACTORY_USER == undefined ||
+     process.env.ARTIFACTORY_PASSWORD == undefined ||
      process.env.DOCKER_HUB_USER == undefined ||
      process.env.DOCKER_HUB_PASSWORD == undefined ) {
 
-     console.log("ERROR: set enviroment variable JENKINS_URL, JENKINS_USER, JENKINS_PASSWORD, DOCKER_HUB_USER, and DOCKER_HUB_PASSWORD");
+     console.log("ERROR: set enviroment variable JENKINS_URL, JENKINS_USER, JENKINS_PASSWORD, ARTIFACTORY_URL, ARTIFACTORY_USER, ARTIFACTORY_PASSWORD, DOCKER_HUB_USER, and DOCKER_HUB_PASSWORD");
      process.exit(1);
 }
 
@@ -63,6 +66,9 @@ app.get('/createJenkinsBuild', function(request, response) {
         <propertiesContent>DEVPROJROOTURL=${query.srcGitHubUrl}
 DEVPROJROOTDIR=${query.baseDir}
 DEVPROJCOMPOSEDIR=${query.composeDir}
+ARTIFACTORY_URL=${process.env.ARTIFACTORY_URL}
+ARTIFACTORY_USER=${process.env.ARTIFACTORY_USER}
+ARTIFACTORY_PASSWORD=${process.env.ARTIFACTORY_PASSWORD}
 DOCKER_HUB_USER=${process.env.DOCKER_HUB_USER}
 DOCKER_HUB_PASSWORD=${process.env.DOCKER_HUB_PASSWORD}</propertiesContent>
         <loadFilesFromMaster>false</loadFilesFromMaster>
