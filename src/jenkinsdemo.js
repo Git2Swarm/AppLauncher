@@ -42,7 +42,7 @@ app.get('/', function (request, response){
 
 app.get('/createJenkinsBuild', function(request, response) {
     var query = url.parse(request.url,true).query;
-    var gitHubURL = query.configGitHubURL;
+    var pipelineGitUrl = query.configGitHubURL;
     console.log(query);
     client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) { 
         crumb = data;
@@ -58,14 +58,13 @@ app.get('/createJenkinsBuild', function(request, response) {
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.19.0">
-      <projectUrl>${gitHubURL}</projectUrl>
+      <projectUrl>${pipelineGitUrl}</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <EnvInjectJobProperty plugin="envinject@1.92.1">
       <info>
-        <propertiesContent>DEVPROJROOTURL=${query.srcGitHubUrl}
-DEVPROJROOTDIR=${query.baseDir}
-DEVPROJCOMPOSEDIR=${query.composeDir}
+        <propertiesContent>APPS_COMPOSE=${query.appsCompose}
+OPS_COMPOSE=${query.opsCompose}
 ARTIFACTORY_URL=${process.env.ARTIFACTORY_URL}
 ARTIFACTORY_USER=${process.env.ARTIFACTORY_USER}
 ARTIFACTORY_PASSWORD=${process.env.ARTIFACTORY_PASSWORD}
@@ -85,7 +84,7 @@ DOCKER_HUB_PASSWORD=${process.env.DOCKER_HUB_PASSWORD}</propertiesContent>
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url>${gitHubURL}</url>
+          <url>${pipelineGitUrl}</url>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>
       <branches>
