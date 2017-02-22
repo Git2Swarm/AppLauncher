@@ -25,7 +25,7 @@
     <div id="maindiv">
 	<div style="margin-left:20px;">
 	   <label style="color:black">
-            Project Name <input style="width: 340px; height: 25px; border-radius: 5px; border: 1px solid black;" id="job_name" type="text">
+            Stack Name <input style="width: 340px; height: 25px; border-radius: 5px; border: 1px solid black;" id="job_name" type="text" oninput="enableConfigureJob();">
 	   </label>
         </div>
 	<br>
@@ -150,8 +150,11 @@ function updatedata()
 
 
 function enableConfigureJob() {
+   document.getElementById("jenkins_job_button").style.backgroundColor = "LightSteelBlue";
+   document.getElementById("jenkins_job_button").value = "Configure Pipeline";
    document.getElementById("jenkins_job_button").disabled = false; 
-   document.getElementById("jenkins_job_button").style.cursor = "pointer"; 
+   document.getElementById("jenkins_job_button").style.cursor = "pointer";
+ 
 }  
 
 function disableConfigureJob() {
