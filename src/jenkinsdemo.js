@@ -32,11 +32,11 @@ app.get('/', function (request, response){
     fs.readFile('jenkinsdemo.html', function (err, html) {
         if (err) {
             console.log("ERROR reading jenkinsdemo.html");
-        }  
+        }
         response.writeHeader(200, {"Content-Type": "text/html"});
-        response.write(html);  
-        response.end();  
-    });    
+        response.write(html);
+        response.end();
+    });
 });
 
 
@@ -44,7 +44,7 @@ app.get('/createJenkinsBuild', function(request, response) {
     var query = url.parse(request.url,true).query;
     var pipelineGitUrl = query.configGitHubURL;
     console.log(query);
-    client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) { 
+    client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
         crumb = data;
         console.log("Configuring pipeline");
         console.log("=======================");
@@ -104,19 +104,19 @@ DOCKER_HUB_PASSWORD=${process.env.DOCKER_HUB_PASSWORD}</propertiesContent>
         var args = {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr },
             data: jobConfig
-        };            
+        };
         client.post(jenkinsURL + "/createItem?name=" + query.jobName, args, function( data, response ) {
             console.log(data);
             var decoder = new  StringDecoder('utf8');
             console.log(decoder.write(data));
         }).on('error', function(e) {
             console.log("Error while reading container jenkinsURL", e);
-        });    
-        
-            
+        });
+
+
     }).on('error', function(e) {
         console.log("Error while reading container jenkinsURL", e);
-    }); 
+    });
     response.end();
 });
 
@@ -126,7 +126,7 @@ app.get('/startJenkinsBuild', function(request, response) {
     console.log("IN startJenkinsBuild");
     console.log(query);
 
-    client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) { 
+    client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
         crumb = data;
         console.log("Building pipeline");
         console.log("=======================");
@@ -135,21 +135,53 @@ app.get('/startJenkinsBuild', function(request, response) {
 
         var args = {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
-        }; 
+        };
 
         client.post(jenkinsURL + "/job/" + query.jobName + "/build", args, function (data, response) {
             crumb = data;
             console.log(crumb);
-            
-            var decoder = new  StringDecoder('utf8');    
+
+            var decoder = new  StringDecoder('utf8');
             console.log(decoder.write(data));
         });
-            
+
     }).on('error', function(e) {
         console.log("Error while reading container jenkinsURL", e);
-    });    
+    });
     response.end();
 });
+
+app.get('/deleteStack', function(request, response) {
+    var query = url.parse(request.url, true).query;
+    var gitHubURL = query.gitHubURL;
+    console.log("IN Delete Stack");
+    console.log(query);
+
+    client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
+        crumb = data;
+        console.log("Delete Stack");
+        console.log("=======================");
+        console.log(data);
+        var crumbStr = data.defaultCrumbIssuer.crumb[0];
+
+        var args = {
+            headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
+        };
+
+        client.post(jenkinsURL + "/job/delete-swarm-stack/buildWithParameters?token=deletetoken&STACK_NAME=demo-mike1", args, function (data, response) {
+            crumb = data;
+            console.log(crumb);
+
+            var decoder = new  StringDecoder('utf8');
+            console.log(decoder.write(data));
+        });
+
+    }).on('error', function(e) {
+        console.log("Error while reading container jenkinsURL", e);
+    });
+    response.end();
+});
+
 var server = app.listen(5000, function () {
   var port = server.address().port;
 
