@@ -23,7 +23,7 @@
 </head>
 <body onload="addRow(); addRowOps();">
     <div id="maindiv">
-	<div style="margin-left:20px;">
+	<div style="margin-left:31px;">
 	   <label style="color:black">
             Stack Name <input style="width: 340px; height: 25px; border-radius: 5px; border: 1px solid black;" id="job_name" type="text" oninput="enableConfigureJob();">
 	   </label>
@@ -62,11 +62,13 @@
 	<div style="text-align:center">
 	<label>
         <input style=" background-color: LightSteelBlue; height:40px; color:white;" type="button" id="jenkins_job_button" value="Configure Pipeline" onclick="createJenkinsBuild();">
-        <input style="background-color: LightSteelBlue; height:40px; color:white;" type="button" id="jenkins_build_button" value="Build Pipeline" onclick="startBuild();">   
+        <input style="background-color: LightSteelBlue; height:40px; color:white;" type="button" id="jenkins_build_button" value="Build Pipeline" onclick="startBuild();">
+	<input style="background-color: LightSteelBlue; height: 40px; color:white;" type="button" id="stack_search_button" value="Delete Stack" onclick="deleteStack();">   
         </label>
 	</div>
     </div>
 <script>
+
 function addRow()
 {
    var tbody  = document.getElementById("addAppUrl-tbody");
@@ -243,6 +245,27 @@ function startBuild() {
     };
     
     xhttp.open("GET", startBuildUrl, true);
+    xhttp.send();    
+    
+}
+
+function deleteStack() {
+    var buildName = document.getElementById("job_name").value;
+    var deleteStackUrl = location.href + "deleteStack?stackName=" + buildName;
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() 
+    {
+        if (xhttp.readyState == 4 && xhttp.status == 200) 
+        {
+            var res = xhttp.responseText;
+            console.log(res);
+                        
+        } else {
+            console.log("IN deleteStack() ERROR [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+        }
+    };
+    
+    xhttp.open("GET", deleteStackUrl, true);
     xhttp.send();    
     
 }

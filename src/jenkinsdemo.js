@@ -168,9 +168,8 @@ app.get('/deleteStack', function(request, response) {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
         };
 
-        client.post(jenkinsURL + "/job/delete-swarm-stack/buildWithParameters?token=deletetoken&STACK_NAME=demo-mike1", args, function (data, response) {
-            crumb = data;
-            console.log(crumb);
+        client.post(jenkinsURL + "/job/delete-swarm-stack/buildWithParameters?token=deletetoken&STACK_NAME=" + query.stackName, args, function (data, response) {
+            console.log(data);
 
             var decoder = new  StringDecoder('utf8');
             console.log(decoder.write(data));
