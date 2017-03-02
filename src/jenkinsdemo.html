@@ -61,9 +61,9 @@
 	<br>
 	<div style="text-align:center">
 	<label>
-        <input style=" background-color: LightSteelBlue; height:40px; color:white;" type="button" id="jenkins_job_button" value="Configure Pipeline" onclick="createJenkinsBuild();">
-        <input style="background-color: LightSteelBlue; height:40px; color:white;" type="button" id="jenkins_build_button" value="Build Pipeline" onclick="startBuild();">
-	<input style="background-color: LightSteelBlue; height: 40px; color:white;" type="button" id="stack_search_button" value="Delete Stack" onclick="deleteStack();">   
+        <input style=" background-color: LightSteelBlue; height:40px; color:white; cursor:pointer;" type="button" id="jenkins_job_button" value="Configure Pipeline" onclick="createJenkinsBuild();">
+        <input style="background-color: LightSteelBlue; height:40px; color:white; cursor:pointer" type="button" id="jenkins_build_button" value="Run Stack" onclick="startBuild();">
+	<input style="background-color: LightSteelBlue; height: 40px; color:white; cursor:pointer" type="button" id="stack_search_button" value="Stop Stack" onclick="deleteStack();">   
         </label>
 	</div>
     </div>
@@ -94,14 +94,14 @@ function addRowOps()
 function test(val, id)
 {
    if(val == ""){
-     document.getElementById(id).style.border="1px solid red";
+     document.getElementById(id).style.border="2px solid red";
      return
    } 
    var newStrValue = new RegExp ( '/blob/' );
    if(newStrValue.test(val) == true){
-      document.getElementById(id).style.border="1px solid green";
+      document.getElementById(id).style.border="2px solid green";
    } else {
-      document.getElementById(id).style.border="1px solid red";
+      document.getElementById(id).style.border="2px solid red";
    }
 }
 
