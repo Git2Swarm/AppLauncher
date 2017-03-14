@@ -5,6 +5,7 @@ var StringDecoder = require('string_decoder').StringDecoder;
 
 var fs = require("fs");
 var http = require('http');
+var https = require('https');
 var url = require('url');
 
 if ( process.env.JENKINS_URL == undefined ||
@@ -25,7 +26,6 @@ var jenkinsUser = process.env.JENKINS_USER;
 var jenkinsPassword = process.env.JENKINS_PASSWORD;
 
 var options_auth = { user: jenkinsUser, password: jenkinsPassword };
-
 var client = new Client(options_auth);
 
 app.get('/', function (request, response){
@@ -148,7 +148,7 @@ app.get('/startJenkinsBuild', function(request, response) {
     }).on('error', function(e) {
         console.log("Error while reading container jenkinsURL", e);
     });
-    response.end();
+	response.end();
 });
 
 app.get('/deleteStack', function(request, response) {
@@ -168,9 +168,8 @@ app.get('/deleteStack', function(request, response) {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
         };
 
-        client.post(jenkinsURL + "/job/delete-swarm-stack/buildWithParameters?token=deletetoken&STACK_NAME=" + query.stackName, args, function (data, response) {
+        client.post(jenkinsURL + "/job/admin/job/delete-stack/buildWithParameters?token=deletetoken&STACK_NAME=" + query.stackName, args, function (data, response) {
             console.log(data);
-
             var decoder = new  StringDecoder('utf8');
             console.log(decoder.write(data));
         });
@@ -181,9 +180,50 @@ app.get('/deleteStack', function(request, response) {
     response.end();
 });
 
+function refreshStack(){
+
+    client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
+        crumb = data;
+        var crumbStr = data.defaultCrumbIssuer.crumb[0];
+
+        var args = {
+            headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
+        };
+
+        client.post(jenkinsURL + "/job/admin/job/list-stack/build", args, function (data, response) {
+            var decoder = new  StringDecoder('utf8');
+        });
+
+    }).on('error', function(e) {
+        console.log("Error while reading container jenkinsURL", e);
+    });
+
+    client.get(jenkinsURL + "/job/admin/job/list-stack/lastBuild/consoleText", function (data, resp) {
+        var decoder = new  StringDecoder('utf8');
+        fs.writeFile('list.txt',data, function (err) {
+            if (err) throw err;
+        });
+    });
+} refreshStack(setInterval(refreshStack, 7000))
+
+app.get('/listStack', function (request, response) {
+    var buf =new Buffer(1024);
+    fs.open('list.txt', 'r',function (err,fd) {
+        if (err) throw err;
+        fs.read(fd, buf, 0, buf.length, 0, function(err, bytes) {
+            if(err) throw err;
+            if(bytes>0) {
+	        var decoder = new StringDecoder('utf8');
+                response.writeHeader(200, {"Content-Type": "text/html"});
+                response.write("<html><body>");
+                response.write(decoder.write(buf.slice(0, bytes).toString()));
+	        response.end();
+            }  
+        });
+    });
+});
+
 var server = app.listen(5000, function () {
-  var port = server.address().port;
-
-  console.log("Example app listening at localhost",port)
-
+    var port = server.address().port;
+    console.log("Example app listening at localhost", port)
 })

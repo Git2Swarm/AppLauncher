@@ -8,160 +8,118 @@
         width: 590px;
         margin: auto;
         padding: 66px;
+        padding-left: 56px;
+        padding-right: 0px;
         border: 1px solid black; 
         border-radius: 8px;
     }
     input
     {
-       border-radius: 2px;
-       border: 1px solid black;  
+        border-radius: 2px;
+        border: 1px solid black;  
     }
     fieldset{
-	margin-right:60px;
+        margin-right:60px;
    }
 </style>
 </head>
 <body onload="addRow(); addRowOps();">
     <div id="maindiv">
-	<div style="margin-left:31px;">
-	   <label style="color:black">
+        <div style="margin-left:31px;">
+            <label style="color:black">
             Stack Name <input style="width: 340px; height: 25px; border-radius: 5px; border: 1px solid black;" id="job_name" type="text" oninput="enableConfigureJob();">
-	   </label>
+            </label>
         </div>
-	<br>
-	<div id="appstack">
-	    <fieldset>
-	    <legend style="f3f3da">Application Stack</legend>
-	    <table id="AppUrl">
-	        <tbody id="addAppUrl-tbody" class="AppUrltbody"> </tbody>
-	    </table>
-	    </fieldset>
-	</div>
-	<br>
-	<div id="opsstack">
-	   <fieldset>
-	   <legend style="color:f3f3da">Operations Stack</legend>
-	   <table id="opsUrl">
-		<tbody id="addOpsUrl-tbody" class="opsUrltbody"> </tbody>
-	   </table>
-	   </fieldset>
-	</div>
-	<br>
-       	<div id="cluster">
-	   <fieldset>
-	   <legend style="color:f3f3da">Cluster</legend>
-	   <label style="margin-left:40px; color:black">
-	   Pipeline
-	   <input style="height:25px; width:340px; border-radius:5px"; id="config_url" type="text" onfocusout="test(this.value, this.id)">
-	   </label>
-	   </fieldset>
-	</div>
-	<input style="width:470px;" placeholder="Enter or copy the src URL" oninput="updatedata();" id="src_url" type="hidden">
-	<input style="width:470px;" id="config_url" type="hidden">
-	<br>
-	<div style="text-align:center">
-	<label>
-        <input style=" background-color: LightSteelBlue; height:40px; color:white; cursor:pointer;" type="button" id="jenkins_job_button" value="Configure Pipeline" onclick="createJenkinsBuild();">
+        <br>
+        <div id="appstack">
+            <fieldset>
+            <legend style="f3f3da">Application Stack</legend>
+            <table id="AppUrl">
+                <tbody id="addAppUrl-tbody" class="AppUrltbody"> </tbody>
+            </table>
+            </fieldset>
+        </div>
+        <br>
+        <div id="opsstack">
+           <fieldset>
+           <legend style="color:f3f3da">Operations Stack</legend>
+           <table id="opsUrl">
+               <tbody id="addOpsUrl-tbody" class="opsUrltbody"> </tbody>
+           </table>
+           </fieldset>
+        </div>
+        <br>
+        <div id="cluster">
+        <fieldset>
+        <legend style="color:f3f3da">Cluster</legend>
+            <label style="margin-left:40px; color:black">
+            Pipeline
+            <input style="height:25px; width:340px; border-radius:5px"; id="config_url" type="text" onfocusout="test(this.value, this.id)">
+            </label>
+        </fieldset>
+        </div>
+        <br>
+        <div style="text-align:center">
+        <label>
+        <input style=" background-color: LightSteelBlue; height:40px; margin-left:-23px; color:white; cursor:pointer;" type="button" id="jenkins_job_button" value="Configure Pipeline" onclick="createJenkinsBuild();">
         <input style="background-color: LightSteelBlue; height:40px; color:white; cursor:pointer" type="button" id="jenkins_build_button" value="Run Stack" onclick="startBuild();">
-	<input style="background-color: LightSteelBlue; height: 40px; color:white; cursor:pointer" type="button" id="stack_search_button" value="Stop Stack" onclick="deleteStack();">   
+        <input style="background-color: LightSteelBlue; height: 40px; color:white; cursor:pointer" type="button" id="stack_search_button" value="Stop Stack" onclick="deleteStack();">
         </label>
-	</div>
+        <br><br>
+        </div>
+        <div id="list" class="list" style="display:none"></div>
+        <fieldset id="fdset"  style="display:none">
+        <legend style="color:f3f3da">Stack List</legend>
+        <table id="tablelist" style="display:none"></table>
+        <div id="container" style="margin-left:77px"></div>
+        </fieldset>
     </div>
 <script>
 
-function addRow()
-{
-   var tbody  = document.getElementById("addAppUrl-tbody");
-   var rowPos = tbody.rows.length;
-   var row = tbody.insertRow(rowPos);
-   var cell1 = row.insertCell(0);
-   var cell2 = row.insertCell(1);
-   cell1.innerHTML = 'Compose File <input type="text" style="height:25px; width:340px; border-radius:5px;" id="src_url'+ rowPos+'" name="src_url'+ rowPos+'" value="" onfocusout="test(this.value, this.id)">';
-   cell2.innerHTML = '<img title = "Add new row" style = "height:23px; width:24px; id = "addRow'+rowPos+'" name = "addRow'+rowPos+'" src = "http://icons.iconarchive.com/icons/iconsmind/outline/256/Add-icon.png" onclick = "addRow()" alt = "add new row">'; 
+function addRow() {
+    var tbody  = document.getElementById("addAppUrl-tbody");
+    var rowPos = tbody.rows.length;
+    var row = tbody.insertRow(rowPos);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    cell1.innerHTML = 'Compose File <input type="text" style="height:25px; width:340px; border-radius:5px;" id="src_url'+ rowPos+'" name="src_url'+ rowPos+'" value="" onfocusout="test(this.value, this.id)">';
+    cell2.innerHTML = '<img title = "Add new row" style = "height:23px; width:24px; id = "addRow'+rowPos+'" name = "addRow'+rowPos+'" src = "http://icons.iconarchive.com/icons/iconsmind/outline/256/Add-icon.png" onclick = "addRow()" alt = "add new row">'; 
 }
 
-function addRowOps()
-{
-   var tbody  = document.getElementById("addOpsUrl-tbody");
-   var rowPos = tbody.rows.length;
-   var row = tbody.insertRow(rowPos);
-   var cell1 = row.insertCell(0);
-   var cell2 = row.insertCell(1);
-   cell1.innerHTML = 'Compose File <input type="text" style="height:25px; width:340px; border-radius:5px;" id="ops_url'+ rowPos+'" name="ops_url'+ rowPos+'" value="" onfocusout="test(this.value, this.id)">';
-   cell2.innerHTML = '<img title = "Add new row" style = "height:23px; width:24px; id = "addRowOps'+rowPos+'" name = "addRowOps'+rowPos+'" src = "http://icons.iconarchive.com/icons/iconsmind/outline/256/Add-icon.png" onclick = "addRowOps()" alt = "add new row">';
+function addRowOps() {
+    var tbody  = document.getElementById("addOpsUrl-tbody");
+    var rowPos = tbody.rows.length;
+    var row = tbody.insertRow(rowPos);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    cell1.innerHTML = 'Compose File <input type="text" style="height:25px; width:340px; border-radius:5px;" id="ops_url'+ rowPos+'" name="ops_url'+ rowPos+'" value="" onfocusout="test(this.value, this.id)">';
+    cell2.innerHTML = '<img title = "Add new row" style = "height:23px; width:24px; id = "addRowOps'+rowPos+'" name = "addRowOps'+rowPos+'" src = "http://icons.iconarchive.com/icons/iconsmind/outline/256/Add-icon.png" onclick = "addRowOps()" alt = "add new row">';
 }
 
-function test(val, id)
-{
-   if(val == ""){
-     document.getElementById(id).style.border="2px solid red";
-     return
-   } 
-   var newStrValue = new RegExp ( '/blob/' );
-   if(newStrValue.test(val) == true){
-      document.getElementById(id).style.border="2px solid green";
-   } else {
-      document.getElementById(id).style.border="2px solid red";
-   }
+function test(val, id) {
+    if(val == ""){
+        document.getElementById(id).style.border="2px solid red";
+        return
+    }  
+    var newStrValue = new RegExp ( '/blob/' );
+    if(newStrValue.test(val) == true){
+        document.getElementById(id).style.border="2px solid green";
+    
+    } else{
+        document.getElementById(id).style.border="2px solid red";
+     } 
 }
-
-var txtbx = document.getElementById("src_url").value;
-var txtbxln = txtbx.length;
-function updatedata()
-{
-    enableConfigureJob();
-    return;
-    var urlText = document.getElementById("src_url").value;
-    var urlProtocol = urlText.split("//", 1);
-    var urlElements = urlText.split("/"); 
-    if((urlProtocol == "https:")||(urlProtocol == "http:"))
-    {
-        var pttnidx = urlText.indexOf("/blob/");
-        var txtln = urlText.length;
-        var txtsb = urlText.substring(pttnidx,txtln);
-        var patterned = urlText.replace(txtsb,".git");
-        if(pttnidx > 0)
-        {
-            var confType = document.getElementById("basic").checked ? "-basic": "-enterprise";
-            document.getElementById("job_name").value = urlElements[4] + confType;
-            document.getElementById("config_url").value = urlText.replace(txtsb, confType + ".git");
-            enableConfigureJob();
-            
-        }
-        else
-        { 
-	    document.getElementById("config_url").value= "";
-            document.getElementById("job_name").value = ""; 
-	    disableConfigureJob();
-        }
-        
-    } 
-    else
-    { 
-        document.getElementById("config_url").value= "";
-        document.getElementById("job_name").value = ""; 
-        disableConfigureJob();
-    }
-
-    if(txtbxln !== urlText.length){
-         document.getElementById("jenkins_job_button").style.backgroundColor = "LightSteelBlue";
-         document.getElementById("jenkins_job_button").value = "Configure Pipeline";  
-    }
- 
-}
-
 
 function enableConfigureJob() {
-   document.getElementById("jenkins_job_button").style.backgroundColor = "LightSteelBlue";
-   document.getElementById("jenkins_job_button").value = "Configure Pipeline";
-   document.getElementById("jenkins_job_button").disabled = false; 
-   document.getElementById("jenkins_job_button").style.cursor = "pointer";
- 
+    document.getElementById("jenkins_job_button").style.backgroundColor = "LightSteelBlue";
+    document.getElementById("jenkins_job_button").value = "Configure Pipeline";
+    document.getElementById("jenkins_job_button").disabled = false; 
+    document.getElementById("jenkins_job_button").style.cursor = "pointer";
 }  
 
 function disableConfigureJob() {
-   document.getElementById("jenkins_job_button").disabled = true; 
-   document.getElementById("jenkins_job_button").style.cursor = ""; 
+    document.getElementById("jenkins_job_button").disabled = true; 
+    document.getElementById("jenkins_job_button").style.cursor = ""; 
 } 
 
 function configure(config){
@@ -172,7 +130,6 @@ function configure(config){
         document.getElementById("jenkins_build_button").disabled = false;
         document.getElementById("jenkins_build_button").style.cursor = "pointer"; 
         return;
-    
     }
 
     if(config == 0){
@@ -187,17 +144,15 @@ function createJenkinsBuild() {
     var srcURL="";
     for (i=0; i<noOfElements; i++) {
         var x = document.getElementById("src_url"+i).value;
-	srcURL += (x+";");
+        srcURL += (x+";");
     }
-
     var noOfRowsOps = document.getElementById("opsUrl").rows.length;
     var i=0;
     var opsURL="";
     for (i=0; i<noOfRowsOps; i++) {
         var x = document.getElementById("ops_url"+i).value;
-	opsURL += (x+";");
+        opsURL += (x+";");
     }
-
     var configURL  = document.getElementById("config_url").value;
     if(srcURL && configURL == "") {
     } else{
@@ -206,7 +161,7 @@ function createJenkinsBuild() {
         var jenkinsURL = location.href + "createJenkinsBuild?jobName=" + buildName 
                                    + "&configGitHubURL=" + configURL
                                    + "&appsCompose=" + srcURL
-				   + "&opsCompose=" + opsURL;
+                                   + "&opsCompose=" + opsURL;
     
         console.log(jenkinsURL);
         var xhttp = new XMLHttpRequest();
@@ -215,11 +170,9 @@ function createJenkinsBuild() {
                var res = xhttp.responseText;
                console.log("IN createJenkinsBuild(): " + res);
                configure(1);
-             
            } else {
-               console.log("IN createJenkinsBuild() ERROR [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+               console.log("IN createJenkinsBuild() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
                configure(0);
-               
            }
         };
     
@@ -238,15 +191,14 @@ function startBuild() {
         {
             var res = xhttp.responseText;
             console.log(res);
-                        
-        } else {
-            console.log("IN startBuild() ERROR [" + xhttp.readyState + "] : [" + xhttp.status + "]");
-        }
+       
+        } else{
+              console.log("IN startBuild() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+          }
     };
     
     xhttp.open("GET", startBuildUrl, true);
     xhttp.send();    
-    
 }
 
 function deleteStack() {
@@ -261,7 +213,7 @@ function deleteStack() {
             console.log(res);
                         
         } else {
-            console.log("IN deleteStack() ERROR [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+            console.log("IN deleteStack() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
         }
     };
     
@@ -269,6 +221,106 @@ function deleteStack() {
     xhttp.send();    
     
 }
+function listStack() {
+    var tablen = document.getElementById("tablelist");
+    for(i= tablen.rows.length -1; i > -1; i--) {
+       tablen.deleteRow(i);
+    }
+    var listStackUrl = location.href + "listStack";
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() 
+    {
+        if (xhttp.readyState == 4 && xhttp.status == 200) 
+        {
+            document.getElementById("fdset").style.display="block";
+            var listTable=document.getElementById("tablelist")
+            listTable.style.display="block";
+            var res = xhttp.responseText;
+            document.getElementById("list").innerHTML=res;
+            var node = document.getElementById("list");
+            textContent = node.textContent;
+            str = textContent.replace(/\n/g, "@");
+            str =str.match("=================(.*)================");
+            str=str[0];
+            str = str.match("=================(.*)=================");
+            str=str[1];
+            str=str.split("@");
+            arrayLength=str.length;
+            var tr, td, row, cell, bt, t;
+            for(var i=1; i < str.length -1; i++) {
+                var strn = str[i];
+                var sname =strn.substring((0),strn.indexOf(" "));
+                for(var j=i; j<=i; j++){
+                    var description=strn.substring(strn.indexOf(" ")+1);
+                    for (row = i; row <=i; row++) {
+                        tr = document.createElement('tr');
+                        tr.setAttribute("id", "trid" + row);
+                        tr.style.border = "0.5px solid ghostwhite";
+                        var arr = new Array();
+                        for (cell = 0; cell <3 ; cell++) {
+                            td = document.createElement('td');
+                            td.setAttribute("id", "tdid"+ row + cell);
+                            bt = document.createElement('BUTTON');
+                            bt.setAttribute("id","btid"+row); 
+                            bt.setAttribute("style", "height:30px; background-color:LightSteelBlue; cursor:pointer; color:white; border:1px solid black");
+                            t = document.createTextNode("Stop Stack");
+                            bt.onclick = function(){
+                                var btn = document.getElementById(this.id);
+                                var x =btn.parentNode.parentNode;
+                                var y = (x.getAttribute('id'));
+                                var nod  = document.getElementById(y).childNodes[1];
+                                console.log(nod);
+                                console.log(nod.innerHTML);
+                                var buildName = nod.innerHTML;
+                                var deleteStackUrl = location.href + "deleteStack?stackName=" + buildName;
+                                var xhttp = new XMLHttpRequest();
+                                xhttp.onreadystatechange = function() 
+                                {
+                       	            if (xhttp.readyState == 4 && xhttp.status == 200) 
+                                    {
+                                        var res = xhttp.responseText;
+                                    } else {
+                                        console.log("IN deleteStack() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+                                      }			
+                                };
+                                xhttp.open("GET", deleteStackUrl, true);
+                                xhttp.send();    
+                            }			
+                            bt.appendChild(t);
+                            td.appendChild(bt);
+                            tr.appendChild(td);
+                            var x = 'tdid'+ row + cell;
+                            arr.push(x);
+                        } 
+                        listTable.appendChild(tr);
+                    }
+                    for(var k =0 ; k < arr.length; k++) {
+                        if(k == 1){
+                        var td2 = document.getElementById(arr[k]).innerHTML=sname;
+                        console.log(td2)
+                        document.getElementById(arr[k]).style.width="125px";
+                        document.getElementById(arr[k]).style.paddingLeft="15px";
+                        }else if(k == 2 ){
+                            var td3 =document.getElementById(arr[k]);
+                            td.innerHTML = description;
+                            td.style.width="250px";
+                            td.style.paddingLeft="5px";
+                         }
+                    }  
+            }
+
+        }
+        }	
+         else {
+            console.log("IN ListStack() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+        }
+    };
+    
+    xhttp.open("GET", listStackUrl, true);
+    xhttp.send();    
+}listStack(setInterval(listStack, 9000));
+
+
 </script>    
 </body>
 </html>
