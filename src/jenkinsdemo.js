@@ -163,7 +163,7 @@ app.get('/deleteStack', function(request, response) {
     client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
         console.log("Crumb Issuer");
         console.log(data);
-        var crumbStr = data.defaultCrumbIssuer.crumb[0];
+        var crumbStr = data.defaultCrumbIssuer.crumb;
 
         var args = {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
