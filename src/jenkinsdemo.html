@@ -69,9 +69,9 @@
         </div>
         <div id="list" class="list" style="display:none"></div>
         <fieldset id="fdset"  style="display:none">
-        <legend style="color:f3f3da">Stack List</legend>
-        <table id="tablelist" style="display:none"></table>
-        <div id="container" style="margin-left:77px"></div>
+        <legend id = "legend" style="color:f3f3da">Stack List</legend>
+       <!-- <table id="tablelist" style="display:none"></table>-->
+        <div id="container" style="margin-left:7px"></div>
         </fieldset>
     </div>
 <script>
@@ -97,17 +97,16 @@ function addRowOps() {
 }
 
 function test(val, id) {
-    if(val == ""){
+    if(val == "") {
         document.getElementById(id).style.border="2px solid red";
         return
     }  
     var newStrValue = new RegExp ( '/blob/' );
-    if(newStrValue.test(val) == true){
+    if(newStrValue.test(val) == true) {
         document.getElementById(id).style.border="2px solid green";
-    
-    } else{
+    } else {
         document.getElementById(id).style.border="2px solid red";
-     } 
+    } 
 }
 
 function enableConfigureJob() {
@@ -155,7 +154,7 @@ function createJenkinsBuild() {
     }
     var configURL  = document.getElementById("config_url").value;
     if(srcURL && configURL == "") {
-    } else{
+    } else {
         console.log("Entering.. createJenkinsBuild()");
         var buildName  = document.getElementById("job_name").value;
         var jenkinsURL = location.href + "createJenkinsBuild?jobName=" + buildName 
@@ -178,7 +177,7 @@ function createJenkinsBuild() {
     
         xhttp.open("GET", jenkinsURL, true);
         xhttp.send();				
-        }
+    }
 }
 
 function startBuild() {
@@ -192,9 +191,9 @@ function startBuild() {
             var res = xhttp.responseText;
             console.log(res);
        
-        } else{
+        } else {
               console.log("IN startBuild() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
-          }
+        }
     };
     
     xhttp.open("GET", startBuildUrl, true);
@@ -221,97 +220,42 @@ function deleteStack() {
     xhttp.send();    
     
 }
+
+function deleteListStack(val){
+    var btn = document.getElementById(val);
+    var x = btn.parentNode.parentNode;
+    var y = (x.getAttribute('id'));
+    var nod = document.getElementById(y).childNodes[1];
+    var stackName = nod.innerHTML;
+    var deleteStackUrl = location.href + "deleteStack?stackName=" + stackName;
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function ()
+    {
+        if (xhttp.readyState == 4 && xhttp.status == 200)
+        {
+            var res = xhttp.responseText;
+        } else {
+            console.log("IN deleteStack() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+        }
+    };
+    xhttp.open("GET", deleteStackUrl, true);
+    xhttp.send();
+}
+        
 function listStack() {
-    var tablen = document.getElementById("tablelist");
-    for(i= tablen.rows.length -1; i > -1; i--) {
-       tablen.deleteRow(i);
-    }
     var listStackUrl = location.href + "listStack";
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() 
     {
         if (xhttp.readyState == 4 && xhttp.status == 200) 
         {
-            document.getElementById("fdset").style.display="block";
-            var listTable=document.getElementById("tablelist")
-            listTable.style.display="block";
-            var res = xhttp.responseText;
-            document.getElementById("list").innerHTML=res;
-            var node = document.getElementById("list");
-            textContent = node.textContent;
-            str = textContent.replace(/\n/g, "@");
-            str =str.match("=================(.*)================");
-            str=str[0];
-            str = str.match("=================(.*)=================");
-            str=str[1];
-            str=str.split("@");
-            arrayLength=str.length;
-            var tr, td, row, cell, bt, t;
-            for(var i=1; i < str.length -1; i++) {
-                var strn = str[i];
-                var sname =strn.substring((0),strn.indexOf(" "));
-                for(var j=i; j<=i; j++){
-                    var description=strn.substring(strn.indexOf(" ")+1);
-                    for (row = i; row <=i; row++) {
-                        tr = document.createElement('tr');
-                        tr.setAttribute("id", "trid" + row);
-                        tr.style.border = "0.5px solid ghostwhite";
-                        var arr = new Array();
-                        for (cell = 0; cell <3 ; cell++) {
-                            td = document.createElement('td');
-                            td.setAttribute("id", "tdid"+ row + cell);
-                            bt = document.createElement('BUTTON');
-                            bt.setAttribute("id","btid"+row); 
-                            bt.setAttribute("style", "height:30px; background-color:LightSteelBlue; cursor:pointer; color:white; border:1px solid black");
-                            t = document.createTextNode("Stop Stack");
-                            bt.onclick = function(){
-                                var btn = document.getElementById(this.id);
-                                var x =btn.parentNode.parentNode;
-                                var y = (x.getAttribute('id'));
-                                var nod  = document.getElementById(y).childNodes[1];
-                                console.log(nod);
-                                console.log(nod.innerHTML);
-                                var buildName = nod.innerHTML;
-                                var deleteStackUrl = location.href + "deleteStack?stackName=" + buildName;
-                                var xhttp = new XMLHttpRequest();
-                                xhttp.onreadystatechange = function() 
-                                {
-                       	            if (xhttp.readyState == 4 && xhttp.status == 200) 
-                                    {
-                                        var res = xhttp.responseText;
-                                    } else {
-                                        console.log("IN deleteStack() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
-                                      }			
-                                };
-                                xhttp.open("GET", deleteStackUrl, true);
-                                xhttp.send();    
-                            }			
-                            bt.appendChild(t);
-                            td.appendChild(bt);
-                            tr.appendChild(td);
-                            var x = 'tdid'+ row + cell;
-                            arr.push(x);
-                        } 
-                        listTable.appendChild(tr);
-                    }
-                    for(var k =0 ; k < arr.length; k++) {
-                        if(k == 1){
-                        var td2 = document.getElementById(arr[k]).innerHTML=sname;
-                        console.log(td2)
-                        document.getElementById(arr[k]).style.width="125px";
-                        document.getElementById(arr[k]).style.paddingLeft="15px";
-                        }else if(k == 2 ){
-                            var td3 =document.getElementById(arr[k]);
-                            td.innerHTML = description;
-                            td.style.width="250px";
-                            td.style.paddingLeft="5px";
-                         }
-                    }  
-            }
-
-        }
-        }	
-         else {
+           var fdset = document.getElementById("fdset");
+           fdset.style.display="block";
+           var legend = document.getElementById("legend");
+           var container = document.getElementById("container");
+           var res = xhttp.responseText;
+           container.innerHTML = res;
+        } else {
             console.log("IN ListStack() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
         }
     };

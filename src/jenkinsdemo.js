@@ -213,11 +213,40 @@ app.get('/listStack', function (request, response) {
         fs.read(fd, buf, 0, buf.length, 0, function(err, bytes) {
             if(err) throw err;
             if(bytes>0) {
-	        var decoder = new StringDecoder('utf8');
-                response.writeHeader(200, {"Content-Type": "text/html"});
-                response.write("<html><body>");
-                response.write(decoder.write(buf.slice(0, bytes).toString()));
-	        response.end();
+            var str=((buf.slice(0, bytes).toString()));
+            str = str.replace(/\n/g, "@");
+            str =str.match("=================(.*)================");
+            str=str[0];
+            str = str.match("=================(.*)=================");
+            str=str[1];
+            str=str.split("@");
+            var row, cell;
+            var htmlTable = "<table id ='table'>";
+            for(var i=1; i < str.length -1; i++) {
+                var strn = str[i];
+                var sname =strn.substring((0),strn.indexOf(" "));
+                for(var j=i; j<=i; j++){
+                    var description=strn.substring(strn.indexOf(" ")+1);
+                    for (row = i; row <=i; row++) {
+                        htmlTable +="<tr id='trid"+ row+"'>";
+                        for (cell = 0; cell <3 ; cell++) {
+                            if (cell == 0) {
+                                htmlTable += "<td id = 'tdid" + row + cell + "'>" +"<button style = 'height:30px; background-color:LightSteelBlue; cursor:pointer; color:white; border:1px solid black;' onclick = 'deleteListStack(this.id)' id = 'btid" + row + "'>"+ "Stop Stack" + "</button>" + "</td>";
+                            } else if(cell == 1){
+                                htmlTable += "<td style = 'padding-left:4%' id ='tdid" + row + cell + "'>" + sname + "</td>";
+                            } else {
+                                htmlTable +="<td style = 'padding-left:9%' id = 'tdid" + row + cell + "'>" + description + "</td>";
+                            }
+                        }
+                        htmlTable +="</tr>"
+                    }
+                }
+            }
+            htmlTable += "</table>";
+	    var decoder = new StringDecoder('utf8');
+            response.writeHeader(200, {"Content-Type": "text/html"});
+            response.write(htmlTable);
+	    response.end();
             }  
         });
     });
@@ -226,4 +255,4 @@ app.get('/listStack', function (request, response) {
 var server = app.listen(5000, function () {
     var port = server.address().port;
     console.log("Example app listening at localhost", port)
-})
+});
