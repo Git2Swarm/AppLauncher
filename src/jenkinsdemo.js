@@ -29,7 +29,7 @@ var client = new Client(options_auth);
 process.on('uncaughtException', function(err) {
     // handle the error safely
     console.log(err)
-})
+});
 
 app.get('/', function (request, response){
     fs.readFile('jenkinsdemo.html', function (err, html) {
@@ -117,8 +117,6 @@ DOCKER_HUB_PASSWORD=${process.env.DOCKER_HUB_PASSWORD}</propertiesContent>
         }).on('error', function(e) {
             console.log("Error while reading container jenkinsURL", e);
         });
-
-
     }).on('error', function(e) {
         console.log("Error while reading container jenkinsURL", e);
     });
@@ -141,8 +139,8 @@ app.get('/startJenkinsBuild', function(request, response) {
         };
 
         client.post(jenkinsURL + "/job/" + query.jobName + "/build", args, function (data, response) {
-	    console.log("Build Data");
-            console.log(data);
+	         console.log("Build Data");
+           console.log(data);
 
             var decoder = new  StringDecoder('utf8');
             console.log(decoder.write(data));
@@ -151,7 +149,7 @@ app.get('/startJenkinsBuild', function(request, response) {
     }).on('error', function(e) {
         console.log("Error while reading container jenkinsURL", e);
     });
-	response.end();
+	  response.end();
 });
 
 app.get('/deleteStack', function(request, response) {
@@ -241,7 +239,7 @@ app.get('/listStack', function (request, response) {
                         for (cell = 0; cell <3 ; cell++) {
                             if (cell == 0) {
                                 htmlTable += "<td id = 'tdid" + row + cell + "'>" +"<button style = 'height:30px; background-color:LightSteelBlue; cursor:pointer; color:white; border:1px solid black;' onclick = 'deleteListStack(this.id)' id = 'btid" + row + "'>"+ "Stop Stack" + "</button>" + "</td>";
-                            } else if(cell == 1){
+                            } else if(cell == 1) {
                                 htmlTable += "<td style = 'padding-left:4%' id ='tdid" + row + cell + "'>" + sname + "</td>";
                             } else {
                                 htmlTable +="<td style = 'padding-left:9%' id = 'tdid" + row + cell + "'>" + description + "</td>";
@@ -252,11 +250,10 @@ app.get('/listStack', function (request, response) {
                 }
             }
             htmlTable += "</table>";
-	    var decoder = new StringDecoder('utf8');
             response.writeHeader(200, {"Content-Type": "text/html"});
             response.write(htmlTable);
-	    response.end();
-            }  
+	          response.end();
+            }
         });
     });
 });
