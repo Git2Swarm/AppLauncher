@@ -4,8 +4,6 @@ var app = express();
 var StringDecoder = require('string_decoder').StringDecoder;
 
 var fs = require("fs");
-var http = require('http');
-var https = require('https');
 var url = require('url');
 
 if ( process.env.JENKINS_URL == undefined ||
@@ -28,6 +26,11 @@ var jenkinsPassword = process.env.JENKINS_PASSWORD;
 var options_auth = { user: jenkinsUser, password: jenkinsPassword };
 var client = new Client(options_auth);
 
+process.on('uncaughtException', function(err) {
+    // handle the error safely
+    console.log(err)
+})
+
 app.get('/', function (request, response){
     fs.readFile('jenkinsdemo.html', function (err, html) {
         if (err) {
@@ -49,7 +52,7 @@ app.get('/createJenkinsBuild', function(request, response) {
         console.log("Configuring pipeline");
         console.log("=======================");
         console.log(data);
-        var crumbStr = data.defaultCrumbIssuer.crumb[0];
+        var crumbStr = data.defaultCrumbIssuer.crumb;
 
         var jobConfig = `<?xml version='1.0' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job@2.1">
@@ -105,6 +108,8 @@ DOCKER_HUB_PASSWORD=${process.env.DOCKER_HUB_PASSWORD}</propertiesContent>
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr },
             data: jobConfig
         };
+        console.log("crumbStr");
+        console.log(crumbStr);
         client.post(jenkinsURL + "/createItem?name=" + query.jobName, args, function( data, response ) {
             console.log(data);
             var decoder = new  StringDecoder('utf8');
@@ -127,19 +132,17 @@ app.get('/startJenkinsBuild', function(request, response) {
     console.log(query);
 
     client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
-        crumb = data;
-        console.log("Building pipeline");
-        console.log("=======================");
+        console.log("Crumb Issuer");
         console.log(data);
-        var crumbStr = data.defaultCrumbIssuer.crumb[0];
+        var crumbStr = data.defaultCrumbIssuer.crumb;
 
         var args = {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
         };
 
         client.post(jenkinsURL + "/job/" + query.jobName + "/build", args, function (data, response) {
-            crumb = data;
-            console.log(crumb);
+	    console.log("Build Data");
+            console.log(data);
 
             var decoder = new  StringDecoder('utf8');
             console.log(decoder.write(data));
@@ -158,11 +161,9 @@ app.get('/deleteStack', function(request, response) {
     console.log(query);
 
     client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
-        crumb = data;
-        console.log("Delete Stack");
-        console.log("=======================");
+        console.log("Crumb Issuer");
         console.log(data);
-        var crumbStr = data.defaultCrumbIssuer.crumb[0];
+        var crumbStr = data.defaultCrumbIssuer.crumb;
 
         var args = {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
@@ -182,9 +183,8 @@ app.get('/deleteStack', function(request, response) {
 
 function refreshStack(){
 
-    client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
-        crumb = data;
-        var crumbStr = data.defaultCrumbIssuer.crumb[0];
+    var req = client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
+        var crumbStr = data.defaultCrumbIssuer.crumb;
 
         var args = {
             headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
@@ -194,7 +194,16 @@ function refreshStack(){
             var decoder = new  StringDecoder('utf8');
         });
 
-    }).on('error', function(e) {
+    });
+    req.on('requestTimeout', function(req) {
+        console.log("Request has expired");
+        req.abort();
+    });
+
+    req.on('requestTimeout', function(res) {
+        console.log("Response has expired");
+    });
+    req.on('error', function(e) {
         console.log("Error while reading container jenkinsURL", e);
     });
 
@@ -207,7 +216,7 @@ function refreshStack(){
 } refreshStack(setInterval(refreshStack, 7000))
 
 app.get('/listStack', function (request, response) {
-    var buf =new Buffer(1024);
+    var buf = new Buffer(1024);
     fs.open('list.txt', 'r',function (err,fd) {
         if (err) throw err;
         fs.read(fd, buf, 0, buf.length, 0, function(err, bytes) {
