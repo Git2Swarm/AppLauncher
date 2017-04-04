@@ -5,7 +5,7 @@
     {
         color: white; 
         background-color: LightSlateGrey; 
-        width: 590px;
+        width: 810px;
         margin: auto;
         padding: 66px;
         padding-left: 56px;
@@ -25,9 +25,10 @@
 </head>
 <body onload="addRow(); addRowOps();">
     <div id="maindiv">
+        <div id = "newBuild">
         <div style="margin-left:31px;">
             <label style="color:black">
-            Stack Name <input style="width: 340px; height: 25px; border-radius: 5px; border: 1px solid black;" id="job_name" type="text" oninput="enableConfigureJob();">
+            Stack Name <input style="width: 490px; height: 29px; border-radius: 5px; border: 1px solid black;" id="job_name" type="text" oninput="enableConfigureJob();">
             </label>
         </div>
         <br>
@@ -54,7 +55,7 @@
         <legend style="color:f3f3da">Cluster</legend>
             <label style="margin-left:40px; color:black">
             Pipeline
-            <input style="height:25px; width:340px; border-radius:5px"; id="config_url" type="text" onfocusout="test(this.value, this.id)">
+            <input style="height:29px; width:490px; border-radius:5px"; id="config_url" type="text" onfocusout="test(this.value, this.id)">
             </label>
         </fieldset>
         </div>
@@ -67,12 +68,19 @@
         </label>
         <br><br>
         </div>
-        <div id="list" class="list" style="display:none"></div>
-        <fieldset id="fdset"  style="display:none">
-        <legend id = "legend" style="color:f3f3da">Stack List</legend>
-       <!-- <table id="tablelist" style="display:none"></table>-->
-        <div id="container" style="margin-left:7px"></div>
+        <div id ="newStackList">
+        <fieldset id ="newfdset" style="display:none">
+        <legend id ="newlegend" style="color:f3f3da">Stack List</legend>
+        <div id ="newContainer" style ="margin-left:7px"></div>
         </fieldset>
+        </div>
+        <br>
+        <div id ="jsonApiList">
+        <fieldset id ="apifdset" style="display:none">
+        <legend id ="apilegend" style="color:f3f3da">Job List</legend>
+        <div id ="apiContainer" style ="margin-left:7px"></div>
+        </fieldset>
+        </div>
     </div>
 <script>
 
@@ -82,7 +90,7 @@ function addRow() {
     var row = tbody.insertRow(rowPos);
     var cell1 = row.insertCell(0);
     var cell2 = row.insertCell(1);
-    cell1.innerHTML = 'Compose File <input type="text" style="height:25px; width:340px; border-radius:5px;" id="src_url'+ rowPos+'" name="src_url'+ rowPos+'" value="" onfocusout="test(this.value, this.id)">';
+    cell1.innerHTML = 'Compose File <input type="text" style="height:29px; width:490px; border-radius:5px;" id="src_url'+ rowPos+'" name="src_url'+ rowPos+'" value="" onfocusout="test(this.value, this.id)">';
     cell2.innerHTML = '<img title = "Add new row" style = "height:23px; width:24px; id = "addRow'+rowPos+'" name = "addRow'+rowPos+'" src = "http://icons.iconarchive.com/icons/iconsmind/outline/256/Add-icon.png" onclick = "addRow()" alt = "add new row">'; 
 }
 
@@ -92,7 +100,7 @@ function addRowOps() {
     var row = tbody.insertRow(rowPos);
     var cell1 = row.insertCell(0);
     var cell2 = row.insertCell(1);
-    cell1.innerHTML = 'Compose File <input type="text" style="height:25px; width:340px; border-radius:5px;" id="ops_url'+ rowPos+'" name="ops_url'+ rowPos+'" value="" onfocusout="test(this.value, this.id)">';
+    cell1.innerHTML = 'Compose File <input type="text" style="height:29px; width:490px; border-radius:5px;" id="ops_url'+ rowPos+'" name="ops_url'+ rowPos+'" value="" onfocusout="test(this.value, this.id)">';
     cell2.innerHTML = '<img title = "Add new row" style = "height:23px; width:24px; id = "addRowOps'+rowPos+'" name = "addRowOps'+rowPos+'" src = "http://icons.iconarchive.com/icons/iconsmind/outline/256/Add-icon.png" onclick = "addRowOps()" alt = "add new row">';
 }
 
@@ -200,6 +208,32 @@ function startBuild() {
     xhttp.send();    
 }
 
+function deleteJob(value) {
+    var btn = document.getElementById(value);
+    var x = btn.parentNode.parentNode;
+    var y = (x.getAttribute('id'));
+    var nod = document.getElementById(y).childNodes[2];
+    var jobName = nod.innerHTML;
+    console.log(jobName);
+    var deleteJobUrl = location.href + "deleteJob?jobName=" + jobName;
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function()
+    {
+        if (xhttp.readyState == 4 && xhttp.status == 200)
+        {
+            var res = xhttp.responseText;
+            console.log(res);
+
+        } else {
+              console.log("IN startBuild() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+        }
+    };
+
+    xhttp.open("GET", deleteJobUrl, true);
+    xhttp.send();
+}
+
+
 function deleteStack() {
     var buildName = document.getElementById("job_name").value;
     var deleteStackUrl = location.href + "deleteStack?stackName=" + buildName;
@@ -227,6 +261,7 @@ function deleteListStack(val){
     var y = (x.getAttribute('id'));
     var nod = document.getElementById(y).childNodes[1];
     var stackName = nod.innerHTML;
+    console.log(stackName);
     var deleteStackUrl = location.href + "deleteStack?stackName=" + stackName;
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function ()
@@ -242,27 +277,154 @@ function deleteListStack(val){
     xhttp.send();
 }
         
-function listStack() {
-    var listStackUrl = location.href + "listStack";
+
+function runStack(id) {
+    var btn = document.getElementById(id);
+    var x = btn.parentNode.parentNode;
+    var y = (x.getAttribute('id'));
+    var nod = document.getElementById(y).childNodes[2];
+    var jobName = nod.innerHTML;
+    console.log(jobName);
+    var runStackUrl = location.href + "startJenkinsBuild?jobName=" + jobName;
     var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() 
+    xhttp.onreadystatechange = function ()
     {
-        if (xhttp.readyState == 4 && xhttp.status == 200) 
+        if (xhttp.readyState == 4 && xhttp.status == 200)
         {
-           var fdset = document.getElementById("fdset");
-           fdset.style.display="block";
-           var legend = document.getElementById("legend");
-           var container = document.getElementById("container");
-           var res = xhttp.responseText;
-           container.innerHTML = res;
+            var res = xhttp.responseText;
         } else {
-            console.log("IN ListStack() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+            console.log("IN runStack() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
         }
     };
+    xhttp.open("GET", runStackUrl, true);
+    xhttp.send();
+
+}
+
+function listStack() {
     
+    var listStackUrl = location.href + "listStack";
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function()
+    {
+        if (xhttp.readyState == 4 && xhttp.status == 200)
+        {
+            document.getElementById("newfdset").style.display="block";
+            var container = document.getElementById("newContainer");
+            container.innerHTML = "";
+            var res = xhttp.responseText;
+            res = JSON.parse(res);
+            var resLength = Object.keys(res).length;
+            var table = document.createElement('table');
+            table.setAttribute("style", "width:100%");
+            var tr,td;
+            for ( var i=0; i< resLength; i++) {
+                tr = document.createElement('tr');
+                tr.setAttribute("id", "trid" + i);
+                for ( var j=0; j<4; j++) {
+                    td = document.createElement('td');
+                    td.setAttribute("id", "tdid"+ i + j);
+                    bt = document.createElement('BUTTON');
+                    bt.setAttribute("id","btid"+i);
+                    bt.setAttribute("style", "height:30px; background-color:LightSteelBlue; cursor:pointer; color:white; border:1px solid black");
+                    t = document.createTextNode("Stop Stack");
+                    bt.setAttribute("onclick", "deleteListStack(this.id)");
+                    bt.appendChild(t);
+                    td.appendChild(bt);
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+            container.appendChild(table);
+            var col= [];
+            for (var i=0; i<resLength; i++)
+            {
+                for (var key in res[i]) {
+                    if (col.indexOf(key) === -1) {
+                        col.push(key);
+                    }
+                }
+            }
+            for ( var i = 0; i < resLength; i++) {
+                for (k = 1; k < 4; k++) {
+                     var tdn = document.getElementById("tdid" + i + k);
+                     tdn.setAttribute("style", "color:white");
+                     tdn.innerHTML = res[i][col[k-1]];
+                 }
+             }
+        }
+        else {
+            console.log("IN ListStack()");
+        }
+    };
     xhttp.open("GET", listStackUrl, true);
-    xhttp.send();    
-}listStack(setInterval(listStack, 9000));
+    xhttp.send();
+
+}listStack(setInterval(listStack, 5000));
+
+
+function jobList() {
+
+    var jobListUrl = location.href + "jobList";
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function()
+    {
+        if (xhttp.readyState == 4 && xhttp.status == 200)
+        {
+            var res = xhttp.responseText;
+            res = JSON.parse(res);
+            document.getElementById("apifdset").style.display="block";
+            var container = document.getElementById("apiContainer");
+            container.innerHTML = "";
+            var resLength = res.length;
+            var table = document.createElement('table');
+            table.setAttribute("style", "width:100%");
+            var tr,td;
+            for ( var i=0; i< resLength; i++) {
+                tr = document.createElement('tr');
+                tr.setAttribute("id", "aptrid" + i);
+                for ( var j=0; j<4; j++) {
+                    td = document.createElement('td');
+                    td.setAttribute("id", "aptdid"+ i + j);
+                    bt = document.createElement('BUTTON');
+                    bt.setAttribute("id","apbtid"+i);
+                    bt.setAttribute("style", "height:30px; background-color:LightSteelBlue; cursor:pointer; color:white; border:1px solid black");
+                    t = document.createTextNode("Terminate");
+                    bt.setAttribute("onclick", "deleteJob(this.id)");
+                    bt.appendChild(t);
+                    td.appendChild(bt);
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+            container.appendChild(table);
+            var col= [];
+            for (var i=0; i<resLength; i++) {
+                for (var key in res[i]) {
+                    if (col.indexOf(key) === -1) {
+                        col.push(key);
+                    }
+                }
+            }
+            for ( var i = 0; i < resLength; i++) {
+                for (k = 1; k < 4; k++) {
+                     if (k == 1) {
+                         var butntd = document.getElementById("aptdid" + i + k);
+                         butntd.innerHTML = '<input type = "button" onclick = "runStack(this.id)" style = "height:30px; background-color:LightSteelBlue; cursor:pointer; color:white; border:1px solid black" value = "Run Stack" id ="aptid' + i + k +'"></input>';
+                     } else {
+                     var tdn = document.getElementById("aptdid" + i + k);
+                     tdn.setAttribute("style", "color:white");
+                     tdn.innerHTML = res[i][col[k-1]];
+                     }
+                 }
+             }
+        } else {
+            console.log("IN JobList() INFO [" + xhttp.readyState + "] : [" + xhttp.status + "]");
+        }
+    };
+    xhttp.open("GET", jobListUrl, true);
+    xhttp.send();
+}jobList(setInterval(jobList, 5000))
 
 
 </script>    
