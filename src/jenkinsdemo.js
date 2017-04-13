@@ -217,40 +217,6 @@ app.get('/deleteStack', function(request, response) {
     response.end();
 });
 
-function refreshStack(){
-
-    var req = client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
-        var crumbStr = data.defaultCrumbIssuer.crumb;
-
-        var args = {
-            headers: { "Content-Type": "application/xml", "Jenkins-Crumb" : crumbStr }
-        };
-
-        client.post(jenkinsURL + "/job/admin/job/list-stack/build", args, function (data, response) {
-            var decoder = new  StringDecoder('utf8');
-        });
-
-    });
-    req.on('requestTimeout', function(req) {
-        console.log("Request has expired");
-        req.abort();
-    });
-
-    req.on('requestTimeout', function(res) {
-        console.log("Response has expired");
-    });
-    req.on('error', function(e) {
-        console.log("Error while reading container jenkinsURL", e);
-    });
-
-    client.get(jenkinsURL + "/job/admin/job/list-stack/lastBuild/consoleText", function (data, resp) {
-        var decoder = new  StringDecoder('utf8');
-        fs.writeFile('list.txt',data, function (err) {
-            if (err) throw err;
-        });
-    });
-} refreshStack(setInterval(refreshStack, 7000))
-
 app.get('/listStack', function (request, response) {
     var jsondata;
     stackClient.get(stackListUrl, function ( data, res ) {
