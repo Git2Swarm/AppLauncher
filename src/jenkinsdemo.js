@@ -51,7 +51,8 @@ app.get('/', function (request, response){
 
 app.get('/createJenkinsBuild', function(request, response) {
     var query = url.parse(request.url,true).query;
-    var pipelineGitUrl = query.configGitHubURL;
+    var pipelineGitUrl = "https://github.com/Git2Swarm/pipeline-store.git"
+    var pipelineName = query.configGitHubURL;
     console.log(query);
     client.get(jenkinsURL + "/crumbIssuer/api/xml", function (data, response) {
         crumb = data;
@@ -105,7 +106,7 @@ DOCKER_HUB_PASSWORD=${process.env.DOCKER_HUB_PASSWORD}</propertiesContent>
       <submoduleCfg class="list"/>
       <extensions/>
     </scm>
-    <scriptPath>Jenkinsfile</scriptPath>
+    <scriptPath>${pipelineName}</scriptPath>
   </definition>
   <triggers/>
 </flow-definition>
